@@ -89,7 +89,13 @@ createGenesis() {
     trace_push_batch_size=1000
     sed -i.bak -e "s/^trace_push_batch_size *=.*/trace_push_batch_size = \"$trace_push_batch_size\"/" ${CELESTIA_APP_HOME}/config/config.toml
 
+    # Enable gRPC
+    sed -i'.bak' 's#enable = false#enable = true#g' "${CELESTIA_APP_HOME}"/config/app.toml
+
     echo "Tracing is set up with the ability to pull traced data from the node on the address http://127.0.0.1${trace_pull_address}"
+
+    GENESIS_HASH=$(sha256sum ${GENESIS_FILE} | cut -d ' ' -f1)
+    echo "Genesis hash: ${GENESIS_HASH}"
 }
 
 deleteCelestiaAppHome() {
@@ -99,6 +105,8 @@ deleteCelestiaAppHome() {
 
 startCelestiaApp() {
   echo "Starting celestia-app..."
+  GENESIS_HASH=$(sha256sum ${GENESIS_FILE} | cut -d ' ' -f1)
+      echo "Genesis hash: ${GENESIS_HASH}"
   celestia-appd start \
     --home "${CELESTIA_APP_HOME}" \
     --api.enable \
